@@ -2057,10 +2057,21 @@ const questions = [
     }
 ];
 
+// Function to shuffle array using Fisher-Yates algorithm
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // Quiz logic
 let currentQuestionIndex = 0;
 let userAnswers = [];
 let score = 0;
+let shuffledQuestions = [];
 
 // DOM elements
 const questionNumberElement = document.getElementById('question-number');
@@ -2081,7 +2092,9 @@ const backToQuizButtonElement = document.getElementById('back-to-quiz-btn');
 // Initialize quiz
 function initQuiz() {
     currentQuestionIndex = 0;
-    userAnswers = new Array(questions.length);
+    // Shuffle questions for random order
+    shuffledQuestions = shuffleArray(questions);
+    userAnswers = new Array(shuffledQuestions.length);
     score = 0;
     showQuestion(currentQuestionIndex);
     updateNavigationButtons();
@@ -2090,8 +2103,8 @@ function initQuiz() {
 
 // Show question
 function showQuestion(index) {
-    const question = questions[index];
-    questionNumberElement.textContent = `Question ${index + 1} of ${questions.length}`;
+    const question = shuffledQuestions[index];
+    questionNumberElement.textContent = `Question ${index + 1} of ${shuffledQuestions.length}`;
     questionTextElement.textContent = question.question;
     
     // Clear options container
@@ -2130,7 +2143,7 @@ function selectOption(optionIndex, optionElement) {
     userAnswers[currentQuestionIndex] = optionIndex;
     
     // Show explanation
-    const question = questions[currentQuestionIndex];
+    const question = shuffledQuestions[currentQuestionIndex];
     showExplanation(question, optionIndex, optionElement);
     
     // Enable next button
@@ -2204,15 +2217,15 @@ submitButtonElement.addEventListener('click', () => {
     // Calculate score
     score = 0;
     userAnswers.forEach((answer, index) => {
-        if (answer === questions[index].answer) {
+        if (answer === shuffledQuestions[index].answer) {
             score++;
         }
     });
     
     // Show results
     scoreElement.textContent = score;
-    totalElement.textContent = questions.length;
-    percentElement.textContent = Math.round((score / questions.length) * 100);
+    totalElement.textContent = shuffledQuestions.length;
+    percentElement.textContent = Math.round((score / shuffledQuestions.length) * 100);
     resultsContainerElement.classList.remove('hidden');
     
     // Hide quiz
@@ -2258,7 +2271,10 @@ restartButtonElement.addEventListener('click', () => {
 function showAllQuestions() {
     allQuestionsContainerElement.innerHTML = '';
     
-    questions.forEach((question, index) => {
+    // Use shuffled questions for the all questions view as well
+    const displayQuestions = shuffleArray(questions);
+    
+    displayQuestions.forEach((question, index) => {
         const questionBlock = document.createElement('div');
         questionBlock.classList.add('question-block');
         
